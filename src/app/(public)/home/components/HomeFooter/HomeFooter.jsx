@@ -4,7 +4,7 @@ import './HomeFooter.scss';
 export default function HomeFooter() {
  return <footer className="home-footer"><div className="home-footer__grid"><div className="home-footer__brand"><Link prefetch={false} href="/"><Image src="/equa-logo.png" alt="" width={40} height={40} /><strong>Orbital Ctrl</strong></Link><p>Gastos compartidos bajo control, para familias, empresas y equipos.</p></div>
  <nav aria-label="Producto"><h3>Producto</h3><a href="#solucion">Beneficios</a><a href="#bento">Características</a><a href="#comparativa">Comparativa</a></nav>
- <nav aria-label="Comunidad"><h3>Comunidad</h3><Link prefetch={false} href="/sugerencias">Ideas y sugerencias</Link><Link prefetch={false} href="/modo-fiesta">Modo Fiesta</Link></nav>
+ <nav aria-label="Comunidad"><h3>Comunidad</h3><Link prefetch={false} href="/sugerencias">Ideas y sugerencias</Link><Link prefetch={false} href="/salas-rapidas">Salas Rápidas</Link></nav>
  <nav aria-label="Tu cuenta"><h3>Tu cuenta</h3><Link prefetch={false} href="/login?mode=login">Iniciar sesión</Link><Link prefetch={false} href="/login?mode=register">Comenzar gratis</Link><Link prefetch={false} href="/dashboard">Dashboard</Link></nav></div>
  <div className="home-footer__bottom"><span>© Orbital Ctrl · Desarrollado por Orbital Dev</span><Link prefetch={false} href="/terminos">Términos y condiciones</Link></div></footer>;
 }

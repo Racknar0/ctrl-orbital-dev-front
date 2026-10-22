@@ -1,6 +1,7 @@
 'use client';
 
 import { useMemo, useState } from 'react';
+import Link from 'next/link';
 import { ArrowRight, Zap } from '../HomeIcon/HomeIcon';
 import './SalasRapidasBanner.scss';
 
@@ -12,8 +13,8 @@ const demoRooms = [
 
 const money = (amount) => new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 }).format(amount);
 
-export default function SalasRapidasBanner() {
-  const [isOpen, setIsOpen] = useState(false);
+export default function SalasRapidasBanner({ initialOpen = false, onClose }) {
+  const [isOpen, setIsOpen] = useState(initialOpen);
   const [room, setRoom] = useState(demoRooms[0]);
   const [code, setCode] = useState('');
   const [person, setPerson] = useState('');
@@ -64,11 +65,11 @@ export default function SalasRapidasBanner() {
           <p>Lleva tus finanzas diarias en tu propia app. Y cuando hagas una salida, viaje o asado con amigos o compañeros, abres una sala temporal: cada uno anota lo que pagó y se reparte la cuenta sin que nadie tenga que registrarse.</p>
           <div className="quick-rooms__benefits">{[['🎯','Acceso con código','Sin descargar apps ni crear cuentas.'],['⚖️','Reparto exacto','Cero enredos: cada uno paga lo justo.'],['📲','Alias & CBU en 1 toque','Paga directo a las apps de banco.']].map(([icon,title,text])=><div key={title}><span aria-hidden="true">{icon}</span><div><strong>{title}</strong><small>{text}</small></div></div>)}</div>
         </div>
-        <div className="quick-rooms__action"><button type="button" onClick={() => setIsOpen(true)}>Abrir Salas Rápidas<ArrowRight size={16} /></button><small>✧ Prueba Asados, Bares y Pizzas</small></div>
+        <div className="quick-rooms__action"><Link href="/salas-rapidas">Abrir Salas Rápidas<ArrowRight size={16} /></Link><small>✧ Prueba Asados, Bares y Pizzas</small></div>
       </div> : <div className="quick-rooms__app">
         <header className="quick-rooms__app-header">
           <div><span className="quick-rooms__badge"><Zap size={14} />Sala de prueba · Sin registro</span><h2 id="quick-rooms-title">Tu grupo, <span>cuenta clara.</span></h2></div>
-          <button className="quick-rooms__back" type="button" onClick={() => setIsOpen(false)}>← Volver</button>
+          <button className="quick-rooms__back" type="button" onClick={() => onClose ? onClose() : setIsOpen(false)}>← Volver</button>
         </header>
         <div className="quick-rooms__workspace">
           <aside className="quick-rooms__sidebar">
