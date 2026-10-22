@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import HttpService from '@/services/HttpService';
+import PasswordInput from '@/components/PasswordInput/PasswordInput';
 import useStore, { getState } from '@/store/useStore';
 import './AdminDashboard.scss';
 
@@ -212,7 +213,11 @@ export default function AdminDashboard() {
                 <>
                   <label>Nombre<input required autoComplete="name" value={createForm.name} onChange={(event) => setCreateForm({ ...createForm, name: event.target.value })} /></label>
                   <label>Correo electrónico<input required type="email" autoComplete="email" value={createForm.email} onChange={(event) => setCreateForm({ ...createForm, email: event.target.value })} /></label>
-                  <label>Contraseña inicial<input required type="password" minLength={8} autoComplete="new-password" value={createForm.password} onChange={(event) => setCreateForm({ ...createForm, password: event.target.value })} /><small>Mínimo 8 caracteres.</small></label>
+                  <div className="admin-dashboard__password-field">
+                    <label htmlFor="admin-initial-password">Contraseña inicial</label>
+                    <PasswordInput id="admin-initial-password" required minLength={8} autoComplete="new-password" value={createForm.password} onChange={(event) => setCreateForm({ ...createForm, password: event.target.value })} />
+                    <small>Mínimo 8 caracteres.</small>
+                  </div>
                   <label>Rol de plataforma<select value={createForm.platformRole} onChange={(event) => setCreateForm({ ...createForm, platformRole: event.target.value })}><option value="USER">Usuario</option><option value="ADMIN">Administrador</option></select></label>
                 </>
               ) : (

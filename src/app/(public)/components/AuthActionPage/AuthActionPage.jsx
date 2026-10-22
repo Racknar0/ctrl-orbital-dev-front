@@ -1,9 +1,12 @@
 "use client";
 
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import HttpService from '@/services/HttpService';
+import { authErrorMessage } from '@/helpers/authFeedback';
+import AuthNotice from '../AuthNotice/AuthNotice';
+import PasswordInput, { PasswordMatchFeedback } from '@/components/PasswordInput/PasswordInput';
 import LoginHeader from '../../login/components/LoginHeader/LoginHeader';
 import LoginShowcase from '../../login/components/LoginShowcase/LoginShowcase';
 import './AuthActionPage.scss';
@@ -35,11 +38,18 @@ export default function AuthActionPage({ mode }) {
   const [notice, setNotice] = useState('');
   const [isSuccess, setIsSuccess] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [noticeType, setNoticeType] = useState('info');
+  const inFlight = useRef(false);
+  const [passwordValue, setPasswordValue] = useState('');
+  const [confirmation, setConfirmation] = useState('');
   const copy = actionCopy[mode];
 
   async function handleSubmit(event) {
     event.preventDefault();
-    setNotice('');
+    if (inFlight.current) return;
+    inFlight.current = true;
+    setNoticeType('pending');
+    setNotice(mode === 'forgot' ? 'Estamos enviando el enlace de recuperación. Espera un momento.' : 'Estamos procesando tu solicitud.');
     setIsSubmitting(true);
 
     const form = new FormData(event.currentTarget);
@@ -56,6 +66,8 @@ export default function AuthActionPage({ mode }) {
       const password = String(form.get('password') || '');
       const confirmPassword = String(form.get('confirmPassword') || '');
       if (password !== confirmPassword) {
+        inFlight.current = false;
+        setNoticeType('error');
         setNotice('Las contraseñas no coinciden.');
         setIsSubmitting(false);
         return;
@@ -65,13 +77,16 @@ export default function AuthActionPage({ mode }) {
     }
 
     try {
-      const { data } = await new HttpService().postData(url, payload);
+      const { data } = await new HttpService().postData(url, payload, { timeout: mode === 'forgot' ? 45000 : 15000 });
       setNotice(data.message || 'Listo.');
+      setNoticeType('success');
       setIsSuccess(true);
     } catch (error) {
-      setNotice(error.response?.data?.message || 'No pudimos completar la solicitud. Inténtalo de nuevo.');
+      setNoticeType('error');
+      setNotice(authErrorMessage(error, mode === 'forgot'));
       setIsSuccess(false);
     } finally {
+      inFlight.current = false;
       setIsSubmitting(false);
     }
   }
@@ -87,15 +102,14 @@ export default function AuthActionPage({ mode }) {
               <span className="auth-action__eyebrow">{copy.eyebrow}</span>
               <h1 id="auth-action-title">{copy.title}</h1>
               <p className="auth-action__description">{copy.description}</p>
+              <AuthNotice message={notice || (mode !== 'forgot' && !token ? 'El enlace no contiene un token válido.' : '')} type={mode !== 'forgot' && !token ? 'error' : noticeType} />
 
               {isSuccess ? (
                 <div className="auth-action__result">
-                  <p className="auth-action__notice auth-action__notice--success" role="status">{notice}</p>
                   <Link className="auth-action__link" href="/login?mode=login">{copy.successLink}</Link>
                 </div>
               ) : mode === 'verify' ? (
                 <form onSubmit={handleSubmit}>
-                  {!token && <p className="auth-action__notice" role="alert">El enlace no contiene un token válido.</p>}
                   <button className="auth-action__submit" type="submit" disabled={isSubmitting || !token}>
                     {isSubmitting ? 'Verificando…' : 'Verificar correo'}
                   </button>
@@ -107,24 +121,21 @@ export default function AuthActionPage({ mode }) {
                   <button className="auth-action__submit" type="submit" disabled={isSubmitting}>
                     {isSubmitting ? 'Enviando…' : 'Enviar enlace'}
                   </button>
-                  {notice && <p className="auth-action__notice" role="status">{notice}</p>}
                 </form>
               ) : (
                 <form onSubmit={handleSubmit}>
-                  {!token && <p className="auth-action__notice" role="alert">El enlace no contiene un token válido.</p>}
                   <label htmlFor="reset-password">Contraseña nueva</label>
-                  <input id="reset-password" name="password" type="password" autoComplete="new-password" minLength={8} required />
+                  <PasswordInput id="reset-password" name="password" value={passwordValue} onChange={(event) => setPasswordValue(event.target.value)} autoComplete="new-password" minLength={8} required />
                   <label htmlFor="reset-confirm-password">Confirma la contraseña</label>
-                  <input id="reset-confirm-password" name="confirmPassword" type="password" autoComplete="new-password" minLength={8} required />
+                  <PasswordInput id="reset-confirm-password" name="confirmPassword" value={confirmation} onChange={(event) => setConfirmation(event.target.value)} aria-invalid={!!confirmation && passwordValue !== confirmation} aria-describedby={confirmation ? 'reset-password-match' : undefined} visibilityLabel="confirmación de contraseña" autoComplete="new-password" minLength={8} required />
+                  <PasswordMatchFeedback id="reset-password-match" password={passwordValue} confirmation={confirmation} />
                   <small>Mínimo 8 caracteres.</small>
-                  <button className="auth-action__submit" type="submit" disabled={isSubmitting || !token}>
+                  <button className="auth-action__submit" type="submit" disabled={isSubmitting || !token || (!!confirmation && passwordValue !== confirmation)}>
                     {isSubmitting ? 'Guardando…' : 'Cambiar contraseña'}
                   </button>
                 </form>
               )}
 
-              {!isSuccess && mode === 'verify' && notice && <p className="auth-action__notice" role="alert">{notice}</p>}
-              {!isSuccess && mode === 'reset' && notice && <p className="auth-action__notice" role="alert">{notice}</p>}
               {!isSuccess && <Link className="auth-action__back" href="/login?mode=login">Volver a iniciar sesión</Link>}
             </div>
           </section>

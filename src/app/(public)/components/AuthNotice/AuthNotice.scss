@@ -1,0 +1,24 @@
+.auth-notice {
+  margin: 0 0 20px;
+  padding: 16px;
+  border: 1px solid var(--login-accent);
+  border-inline-start-width: 4px;
+  border-radius: 10px;
+  background: var(--login-paper);
+  color: var(--login-ink);
+  font-size: var(--text-small);
+  line-height: var(--leading-body);
+  overflow-wrap: anywhere;
+  scroll-margin: 24px;
+
+  strong { font-weight: var(--weight-bold); }
+  p { margin: 4px 0 0; }
+
+  &--error { border-color: #d6675c; }
+  &--success { border-color: #47936e; }
+
+  &:focus-visible {
+    outline: 2px solid var(--login-accent);
+    outline-offset: 3px;
+  }
+}

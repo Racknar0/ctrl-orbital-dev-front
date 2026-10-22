@@ -1,12 +1,15 @@
 "use client";
 
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useSearchParams } from 'next/navigation';
 import HttpService from '@/services/HttpService';
 import useStore from '@/store/useStore';
 import LoginIcon from '../LoginIcon/LoginIcon';
+import AuthNotice from '../../../components/AuthNotice/AuthNotice';
+import PasswordInput, { PasswordMatchFeedback } from '@/components/PasswordInput/PasswordInput';
+import { authErrorMessage } from '@/helpers/authFeedback';
 import './LoginForm.scss';
 
 export default function LoginForm() {
@@ -19,9 +22,29 @@ export default function LoginForm() {
 function AccountForm({ mode, searchParams }) {
   const [notice, setNotice] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [noticeType, setNoticeType] = useState('info');
+  const [registeredEmail, setRegisteredEmail] = useState('');
+  const inFlight = useRef(false);
+  const [passwordValue, setPasswordValue] = useState('');
+  const [confirmation, setConfirmation] = useState('');
+  const emailRef = useRef(null);
+  const rememberRef = useRef(null);
   const router = useRouter();
   const setSession = useStore((state) => state.login);
   const isRegister = mode === 'register';
+
+  useEffect(() => {
+    if (isRegister) return;
+    try {
+      const savedEmail = localStorage.getItem('orbital_remembered_email');
+      if (savedEmail && emailRef.current && rememberRef.current) {
+        emailRef.current.value = savedEmail;
+        rememberRef.current.checked = true;
+      }
+    } catch {
+      // El acceso a la cuenta sigue disponible si el navegador bloquea el almacenamiento.
+    }
+  }, [isRegister]);
 
   function modeHref(nextMode) {
     const params = new URLSearchParams(searchParams.toString());
@@ -31,13 +54,23 @@ function AccountForm({ mode, searchParams }) {
 
   async function handleSubmit(event) {
     event.preventDefault();
-    setNotice('');
+    if (inFlight.current) return;
+    inFlight.current = true;
+    setNoticeType('pending');
+    setNotice(isRegister ? 'Estamos creando tu cuenta y enviando el correo de verificación. Espera un momento.' : 'Estamos validando tus credenciales.');
     setIsSubmitting(true);
 
     const formElement = event.currentTarget;
     const form = new FormData(formElement);
     const email = String(form.get('email') || '').trim();
     const password = String(form.get('password') || '');
+    if (isRegister && password !== String(form.get('confirmPassword') || '')) {
+      inFlight.current = false;
+      setIsSubmitting(false);
+      setNoticeType('error');
+      setNotice('Las contraseñas no coinciden. Revisa ambos campos.');
+      return;
+    }
     const payload = isRegister
       ? {
           name: String(form.get('name') || '').trim(),
@@ -49,25 +82,33 @@ function AccountForm({ mode, searchParams }) {
 
     try {
       const service = new HttpService();
-      const { data } = await service.postData(`/api/auth/${isRegister ? 'register' : 'login'}`, payload);
+      const { data } = await service.postData(`/api/auth/${isRegister ? 'register' : 'login'}`, payload, { timeout: isRegister ? 45000 : 15000 });
       if (isRegister) {
-        formElement.reset();
-        setNotice(data.message || 'Revisa tu correo para verificar tu cuenta.');
+        setRegisteredEmail(email);
+        setNoticeType('success');
+        setNotice(`${data.message || 'Cuenta creada.'} Correo: ${email}. Revisa también la carpeta de spam.`);
         return;
       }
       sessionStorage.setItem('orbital_access_token', data.token);
+      try {
+        if (form.get('remember')) localStorage.setItem('orbital_remembered_email', email);
+        else localStorage.removeItem('orbital_remembered_email');
+      } catch {
+        // Recordar el correo es opcional y no debe impedir el ingreso.
+      }
       setSession(data.token, { ...data.user, workspace: data.workspace });
       router.replace(data.user.platformRole === 'ADMIN' ? '/dashboard/admin' : '/dashboard');
     } catch (error) {
-      const message = error.response?.data?.message || 'No pudimos conectar con el servidor. Inténtalo de nuevo.';
-      setNotice(message);
+      setNoticeType('error');
+      setNotice(authErrorMessage(error, isRegister));
     } finally {
+      inFlight.current = false;
       setIsSubmitting(false);
     }
   }
 
   return (
-    <div className="login-form">
+    <div className={`login-form${isRegister ? ' login-form--register' : ''}`}>
       <div className="login-form__heading">
         <span className="login-form__eyebrow">Tu cuenta</span>
         <h1 id="login-title">{isRegister ? 'Crea tu cuenta' : 'Bienvenido a Orbital Ctrl'}</h1>
@@ -79,7 +120,15 @@ function AccountForm({ mode, searchParams }) {
         <Link href={modeHref('register')} scroll={false} prefetch={false} aria-current={isRegister ? 'page' : undefined} className={isRegister ? 'login-form__active' : undefined}>Crear cuenta</Link>
       </nav>
 
-      <form onSubmit={handleSubmit}>
+      <AuthNotice message={notice} type={noticeType} />
+      {registeredEmail ? (
+        <div className="login-form__confirmation">
+          <h2>Verifica tu correo para entrar</h2>
+          <p>Abre el enlace de verificación que enviamos a tu correo. Después podrás iniciar sesión.</p>
+          <Link className="login-form__submit" href={modeHref('login')}>Ir a iniciar sesión</Link>
+        </div>
+      ) : <>
+      <form onSubmit={handleSubmit} aria-busy={isSubmitting}>
         {isRegister && <>
           <div className="login-form__field">
             <label htmlFor="register-name">Nombre completo</label>
@@ -89,7 +138,7 @@ function AccountForm({ mode, searchParams }) {
             </div>
           </div>
           <div className="login-form__field">
-            <label htmlFor="register-team">Nombre de tu familia, empresa o equipo</label>
+            <label htmlFor="register-team">Familia, empresa o equipo</label>
             <div className="login-form__input">
               <LoginIcon name="house" />
               <input id="register-team" name="teamName" type="text" autoComplete="organization" placeholder="Ej. Casa María y Juan, Proyecto Alpha…" required />
@@ -100,7 +149,7 @@ function AccountForm({ mode, searchParams }) {
           <label htmlFor="login-email">Correo electrónico</label>
           <div className="login-form__input">
             <LoginIcon name="mail" />
-            <input id="login-email" name="email" type="email" autoComplete="username" placeholder="tu@correo.com" required />
+            <input ref={emailRef} id="login-email" name="email" type="email" autoComplete="username" placeholder="tu@correo.com" required />
           </div>
         </div>
 
@@ -111,17 +160,27 @@ function AccountForm({ mode, searchParams }) {
           </div>
           <div className="login-form__input">
             <LoginIcon name="key" />
-            <input id="login-password" name="password" type="password" autoComplete={isRegister ? 'new-password' : 'current-password'} placeholder={isRegister ? 'Crea tu contraseña' : 'Tu contraseña'} required />
+            <PasswordInput id="login-password" name="password" value={passwordValue} onChange={(event) => setPasswordValue(event.target.value)} minLength={isRegister ? 8 : undefined} aria-describedby={isRegister ? 'register-password-help' : undefined} autoComplete={isRegister ? 'new-password' : 'current-password'} placeholder="••••••••" required />
           </div>
+          {isRegister && <small id="register-password-help">Mínimo 8 caracteres.</small>}
         </div>
 
+        {isRegister && <div className="login-form__field">
+          <label htmlFor="register-confirm-password">Repetir contraseña</label>
+          <div className="login-form__input">
+            <LoginIcon name="key" />
+            <PasswordInput id="register-confirm-password" name="confirmPassword" value={confirmation} onChange={(event) => setConfirmation(event.target.value)} aria-invalid={!!confirmation && passwordValue !== confirmation} aria-describedby={confirmation ? 'register-password-match' : undefined} visibilityLabel="confirmación de contraseña" autoComplete="new-password" minLength={8} placeholder="••••••••" required />
+          </div>
+          <PasswordMatchFeedback id="register-password-match" password={passwordValue} confirmation={confirmation} />
+        </div>}
+
         {!isRegister && <label className="login-form__remember">
-          <input type="checkbox" name="remember" />
-          <span>Recuérdame <small>(recordar mi correo para el próximo ingreso)</small></span>
+          <input ref={rememberRef} type="checkbox" name="remember" onChange={(event) => { if (!event.target.checked) { try { localStorage.removeItem('orbital_remembered_email'); } catch { /* El almacenamiento puede estar bloqueado. */ } } }} />
+          <span>Recordar mi correo</span>
         </label>}
 
-        <button type="submit" className="login-form__submit" disabled={isSubmitting}>
-          <span>{isSubmitting ? 'Un momento…' : isRegister ? 'Crear mi cuenta' : 'Iniciar sesión'}</span>
+        <button type="submit" className="login-form__submit" disabled={isSubmitting || (isRegister && !!confirmation && passwordValue !== confirmation)}>
+          <span>{isSubmitting ? (isRegister ? 'Creando cuenta y enviando correo…' : 'Iniciando sesión…') : isRegister ? 'Crear mi cuenta' : 'Iniciar sesión'}</span>
           {!isSubmitting && <LoginIcon name="arrowRight" />}
         </button>
         <p className="login-form__terms">
@@ -131,8 +190,9 @@ function AccountForm({ mode, searchParams }) {
         </p>
       </form>
 
+      {!isRegister && <>
       <div className="login-form__divider"><span>O continúa con</span></div>
-      <button type="button" className="login-form__google" onClick={() => setNotice('El acceso con Google estará disponible próximamente.')}>
+      <button type="button" className="login-form__google" disabled={isSubmitting} onClick={() => { setNoticeType('info'); setNotice('El acceso con Google estará disponible próximamente.'); }}>
         <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
           <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
           <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
@@ -141,7 +201,8 @@ function AccountForm({ mode, searchParams }) {
         </svg>
         Continuar con Google
       </button>
-      <p className="login-form__notice" role="status">{notice}</p>
+      </>}
+      </>}
     </div>
   );
 }

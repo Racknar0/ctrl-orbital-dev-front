@@ -118,9 +118,11 @@
 
   &__remember {
     display: flex;
-    align-items: flex-start;
-    gap: 10px;
-    margin-block: 4px 20px;
+    align-items: center;
+    gap: 8px;
+    width: fit-content;
+    min-height: 36px;
+    margin-block: 0 12px;
     font-size: var(--text-small);
     font-weight: var(--weight-medium);
     cursor: pointer;
@@ -129,7 +131,7 @@
       width: 16px;
       height: 16px;
       flex-shrink: 0;
-      margin: 4px 0 0;
+      margin: 0;
       accent-color: var(--login-accent);
     }
 
@@ -217,13 +219,49 @@
     }
   }
 
-  &__notice {
-    margin: 16px 0 0;
-    color: var(--login-muted);
-    font-size: var(--text-small);
+  &__confirmation {
+    h2 { font-size: var(--text-card-title); }
+    p { margin-block: 12px 20px; font-size: var(--text-body); }
+  }
 
-    &:empty {
-      display: none;
+  &__submit:disabled, &__google:disabled {
+    cursor: wait;
+    opacity: .65;
+  }
+
+  &__field > small {
+    display: block;
+    margin-top: 6px;
+    color: var(--login-muted);
+    font-size: var(--text-caption);
+  }
+
+  &--register {
+    max-width: 384px;
+
+    .login-form__heading { margin-bottom: 12px; }
+    .login-form__access { margin-bottom: 16px; }
+
+    form {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      gap: 12px;
+      align-items: start;
+
+      > * { grid-column: 1 / -1; }
+      > .login-form__field:nth-child(4),
+      > .login-form__field:nth-child(5) { grid-column: auto; }
     }
+
+    .login-form__field { margin-bottom: 0; }
+    .login-form__input input { padding-block: 10px; }
+    .login-form__terms { margin-top: 0; }
+    .login-form__submit { margin-top: 2px; }
+  }
+}
+
+@media (max-width: 480px) {
+  .login-form--register form {
+    grid-template-columns: minmax(0, 1fr);
   }
 }
