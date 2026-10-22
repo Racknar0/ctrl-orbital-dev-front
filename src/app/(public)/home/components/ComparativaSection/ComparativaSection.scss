@@ -1,0 +1,98 @@
+@use '../../../../../styles/home' as home;
+.comparison  {
+  @include home.section;
+  &__heading  {
+    @include home.heading;
+  }
+  &__table  {
+    border: 1px solid var(--line);
+    border-radius: 24px;
+    overflow: hidden;
+    background: var(--surface);
+  }
+  table  {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+    font-size: var(--text-small);
+    line-height: 1.7;
+  }
+  caption  {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+  }
+  th, td  {
+    padding: 20px 24px;
+    border-bottom: 1px solid var(--line);
+  }
+  th  {
+    font-weight: var(--weight-medium);
+  }
+  td  {
+    color: var(--muted);
+  }
+  thead  {
+    background: var(--soft);
+  }
+  tr:last-child :is(th, td)  {
+    border-bottom: 0;
+  }
+  tr > :last-child  {
+    background: var(--soft);
+    border-left: 1px solid var(--line);
+    color: var(--gold);
+  }
+  td span  {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    svg  {
+      color: var(--green);
+      margin-top: 3px;
+    }
+  }
+  &__mobile  {
+    display: none;
+  }
+  @media (max-width: 767px)  {
+    &__table  {
+      display: none;
+    }
+    &__mobile  {
+      display: grid;
+      gap: 12px;
+      article  {
+        @include home.card;
+        padding: 20px;
+      }
+      h3  {
+        margin: 0 0 16px;
+        font-size: var(--text-body);
+      }
+      strong  {
+        font-size: var(--text-small);
+      }
+      p  {
+        font-size: var(--text-small);
+        line-height: 1.7;
+        color: var(--muted);
+        margin: 5px 0;
+        display: flex;
+        gap: 8px;
+      }
+      article > div  {
+        margin-top: 14px;
+        padding: 12px;
+        background: var(--soft);
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        strong  {
+          color: var(--gold);
+        }
+      }
+    }
+  }
+}

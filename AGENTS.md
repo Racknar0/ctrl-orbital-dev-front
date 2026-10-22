@@ -15,6 +15,8 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 - No instalar dependencias ni modificar `package.json` sin autorización explícita.
 - No refactorizar código fuera del alcance de la tarea.
 - No crear carpetas, archivos placeholder ni `.gitkeep` vacíos.
+- Todos los SCSS deben tener identacion de 2 espacios y no usar `!important`.
+
 
 ## Estructura y organización
 - Árbol base:
@@ -28,7 +30,28 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
     styles/       # Tokens globales, mixins y variables SCSS
   ```
 - Componentes en su propia carpeta: `Nombre/Nombre.jsx` y `Nombre/Nombre.scss`. El JSX importa su SCSS vecino.
+- Cada vista debe tener su propia carpeta de componentes , solamente debe ir a shared si es un componente que se reutiliza en varias vistas.
 - Mantener SCSS puro: no añadir Tailwind, Bootstrap ni librerías de estilos.
+
+## Tipografía y tamaños
+- Familia principal: **Satoshi**, alojada localmente y cargada una sola vez con `next/font/local` en el layout raíz. Conservar su licencia junto a los archivos de fuente.
+- Consumir `var(--font-sans)` y los tokens de `src/styles/_typography.scss`; no declarar familias ni cargar fuentes desde componentes. Formularios y botones heredan la familia.
+- Usar solo tres pesos: `--weight-regular` (400) para lectura, `--weight-medium` (500) para títulos y controles, y `--weight-bold` (700) para énfasis puntual. No introducir pesos sintéticos ni usar negrita en todos los títulos.
+
+  | Rol | Token | Tamaño |
+  | --- | --- | --- |
+  | Etiquetas y notas | `--text-caption` | 0.75rem / 12px |
+  | Texto secundario y botones | `--text-small` | 0.875rem / 14px |
+  | Texto principal y formularios | `--text-body` | 1rem / 16px |
+  | Introducción destacada | `--text-lead` | 1.125rem / 18px |
+  | Títulos de tarjetas | `--text-card-title` | 1.25rem / 20px |
+  | Títulos de sección | `--text-section-title` | Fluido entre 30 y 44px |
+  | Título principal | `--text-display` | Fluido entre 40 y 64px; entre 32 y 44px en móvil |
+
+- Usar `rem` y `clamp()` para tipografía, respetando el tamaño raíz del navegador. No fijar el tamaño raíz para forzar equivalencias ni crear tamaños arbitrarios por componente.
+- Interlineado de lectura: `--leading-body` (1.65); títulos: `--leading-heading` (1.15). Tracking normal en párrafos, `--tracking-heading` (-0.025em) en títulos, `--tracking-display` (-0.035em) en el hero y `--tracking-label` (0.12em) solo en etiquetas cortas en mayúsculas.
+- Texto real de lectura: al menos 14px; notas o etiquetas auxiliares: al menos 12px. Inputs: al menos 16px. Comprobar saltos de línea y desbordamientos en móvil y con zoom.
+- Importes comparables usan `font-variant-numeric: tabular-nums`. Las ilustraciones miniaturizadas de producto pueden tener una escala interna menor; esa excepción no aplica a formularios ni datos reales del dashboard.
 
 ## Reglas críticas de ejecución
 - Server Components por defecto. Solo usar `"use client"` en la frontera que requiera hooks, eventos o interactividad.

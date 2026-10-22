@@ -1,0 +1,61 @@
+@use '../../../../../styles/home' as home;
+.solution  {
+  @include home.section;
+  padding-top: 80px;
+  padding-bottom: 80px;
+  &__heading  {
+    @include home.heading;
+  }
+  &__grid  {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 24px;
+  }
+  &__card  {
+    @include home.card;
+    padding: 28px;
+    display: flex;
+    flex-direction: column;
+    img  {
+      width: 100%;
+      height: auto;
+      aspect-ratio: 3 / 2;
+      object-fit: contain;
+      border-radius: 16px;
+      margin-bottom: 24px;
+    }
+    h3  {
+      font-size: var(--text-card-title);
+      font-weight: var(--weight-medium);
+      letter-spacing: var(--tracking-heading);
+      margin: 0;
+    }
+    p  {
+      font-size: var(--text-small);
+      line-height: 1.8;
+      color: var(--muted);
+      margin: 8px 0 24px;
+      flex: 1;
+    }
+  }
+  &__note  {
+    border-top: 1px solid var(--line);
+    padding-top: 18px;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    font-size: var(--text-small);
+    color: var(--gold);
+  }
+  &__card:nth-child(2) &__note  {
+    color: var(--green);
+  }
+  @media (max-width: 767px)  {
+    &__grid  {
+      grid-template-columns: 1fr;
+    }
+    &__card img  {
+      max-height: 250px;
+    }
+  }
+}

@@ -1,0 +1,35 @@
+@use '../../../../../styles/home' as home;
+.home-cta  {
+  width: min(1280px,100%);
+  margin-inline: auto;
+  padding: 64px 24px;
+  &__panel  {
+    padding: 56px 28px;
+    border: 1px solid #dfc29c4d;
+    border-radius: 24px;
+    text-align: center;
+    color: #fff;
+    background: radial-gradient(ellipse at center,#dfc29c16,transparent 65%),linear-gradient(135deg,#12131a,#161722,#0d0e15);
+    h2  {
+      max-width: 672px;
+      margin: 0 auto;
+      font-weight: var(--weight-medium);
+      letter-spacing: var(--tracking-heading);
+      font-size: var(--text-section-title);
+      line-height: 1.2;
+    }
+    p  {
+      max-width: 672px;
+      margin: 16px auto 28px;
+      font-size: var(--text-body);
+      line-height: 1.8;
+      color: #b7b9c2;
+    }
+    a  {
+      @include home.gold-button;
+    }
+  }
+  @media (max-width: 640px)  {
+    padding: 44px 20px;
+  }
+}

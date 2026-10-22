@@ -1,0 +1,62 @@
+@mixin section  {
+  width: min(1280px, 100%);
+  margin-inline: auto;
+  padding: 64px 24px;
+  border-top: 1px solid var(--line);
+  @media (max-width: 640px)  {
+    padding: 44px 20px;
+  }
+}
+@mixin heading  {
+  text-align: center;
+  max-width: 672px;
+  margin: 0 auto 48px;
+  > span  {
+    font-size: var(--text-caption);
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+    color: var(--muted);
+    font-weight: var(--weight-medium);
+  }
+  h2  {
+    font-size: var(--text-section-title);
+    letter-spacing: var(--tracking-heading);
+    font-weight: var(--weight-medium);
+    line-height: 1.2;
+    margin: 12px 0;
+  }
+  p  {
+    color: var(--muted);
+    font-size: var(--text-body);
+    line-height: 1.75;
+    margin: 0;
+  }
+}
+@mixin card  {
+  border: 1px solid var(--line);
+  border-radius: 28px;
+  background: var(--surface);
+  transition: border-color .25s;
+  &:hover  {
+    border-color: var(--gold-light);
+  }
+}
+@mixin gold-button  {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  padding: 16px 28px;
+  border-radius: 999px;
+  background: linear-gradient(100deg,#dfbf88,#c39556);
+  color: #0b0c10;
+  font-size: var(--text-small);
+  font-weight: var(--weight-medium);
+  transition: filter .2s, transform .2s;
+  &:hover  {
+    filter: brightness(1.08);
+  }
+  &:active  {
+    transform: scale(.98);
+  }
+}

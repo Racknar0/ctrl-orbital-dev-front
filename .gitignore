@@ -40,3 +40,19 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Additional generated files and local tooling
+/dist/
+/test-results/
+/playwright-report/
+*.log
+.idea/
+.vscode/
+
+# Private key material
+*.key
+*.p12
+*.pfx
+
+# Satoshi: download from Fontshare for local use, do not redistribute binaries
+/src/assets/fonts/satoshi/*.woff2

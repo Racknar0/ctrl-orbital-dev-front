@@ -1,0 +1,116 @@
+@use '../../../../../styles/home' as home;
+.quick-rooms  {
+  width: min(1280px,100%);
+  margin-inline: auto;
+  padding: 56px 24px;
+  &__panel  {
+    display: flex;
+    align-items: center;
+    gap: 32px;
+    justify-content: space-between;
+    position: relative;
+    overflow: hidden;
+    padding: 48px;
+    border-radius: 32px;
+    border: 1px solid #dfc29c59;
+    background: radial-gradient(ellipse at top right,#dfc29c22,transparent 55%),radial-gradient(ellipse at bottom left,#22635633,transparent 50%),linear-gradient(135deg,#12131a,#161722,#0d0e15);
+    color: #fff;
+  }
+  &__content  {
+    max-width: 660px;
+    h2  {
+      margin: 16px 0 14px;
+      font-size: var(--text-section-title);
+      letter-spacing: var(--tracking-heading);
+      font-weight: var(--weight-medium);
+      line-height: 1.2;
+      span  {
+        color: #dfc29c;
+      }
+    }
+    > p  {
+      color: #a1a4b0;
+      max-width: 576px;
+      font-size: var(--text-small);
+      line-height: 1.8;
+    }
+  }
+  &__badge  {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 12px;
+    border: 1px solid #dfc29c4d;
+    border-radius: 30px;
+    color: #dfc29c;
+    background: #dfc29c20;
+    text-transform: uppercase;
+    letter-spacing: .1em;
+    font-size: var(--text-caption);
+  }
+  &__benefits  {
+    margin-top: 24px;
+    padding-top: 24px;
+    border-top: 1px solid #ffffff1a;
+    display: grid;
+    grid-template-columns: repeat(3,1fr);
+    gap: 16px;
+    > div  {
+      display: flex;
+      gap: 10px;
+      > span  {
+        font-size: var(--text-small);
+      }
+    }
+    strong, small  {
+      display: block;
+      font-size: var(--text-caption);
+      line-height: 1.6;
+    }
+    strong  {
+      font-weight: var(--weight-medium);
+    }
+    small  {
+      color: #a1a4b0;
+    }
+  }
+  &__action  {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    align-items: flex-end;
+    flex-shrink: 0;
+    a  {
+      @include home.gold-button;
+    }
+    > small  {
+      font-size: var(--text-caption);
+      color: #a1a4b0;
+    }
+  }
+  @media (max-width: 1100px)  {
+    &__panel  {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+    &__action  {
+      align-items: flex-start;
+    }
+  }
+  @media (max-width: 640px)  {
+    padding: 32px 20px;
+    &__panel  {
+      padding: 28px;
+    }
+    &__benefits  {
+      grid-template-columns: 1fr;
+    }
+    &__action  {
+      width: 100%;
+      a  {
+        font-size: var(--text-caption);
+        padding: 14px 18px;
+      }
+    }
+  }
+}
