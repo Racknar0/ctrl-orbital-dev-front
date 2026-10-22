@@ -20,7 +20,9 @@ export default function AdminDashboard() {
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [editingUser, setEditingUser] = useState(null);
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [form, setForm] = useState({ name: '', email: '', platformRole: 'USER' });
+  const [createForm, setCreateForm] = useState({ name: '', email: '', password: '', platformRole: 'USER' });
   const [notice, setNotice] = useState('');
 
   useEffect(() => {
@@ -74,8 +76,16 @@ export default function AdminDashboard() {
 
   function openEditor(user) {
     setEditingUser(user);
+    setIsCreateModalOpen(false);
     setForm({ name: user.name, email: user.email, platformRole: user.platformRole });
     setNotice('');
+  }
+
+  function openCreateModal() {
+    setEditingUser(null);
+    setCreateForm({ name: '', email: '', password: '', platformRole: 'USER' });
+    setNotice('');
+    setIsCreateModalOpen(true);
   }
 
   async function handleSave(event) {
@@ -95,6 +105,23 @@ export default function AdminDashboard() {
       setNotice('Los datos del usuario se actualizaron.');
     } catch (error) {
       setNotice(error.response?.data?.message || 'No se pudieron guardar los cambios.');
+    } finally {
+      setIsSaving(false);
+    }
+  }
+
+  async function handleCreateUser(event) {
+    event.preventDefault();
+    setIsSaving(true);
+    setNotice('');
+
+    try {
+      const { data } = await new HttpService().postData('/api/users', createForm);
+      setUsers((previous) => [data.user, ...previous]);
+      setIsCreateModalOpen(false);
+      setNotice(`Se creó la cuenta de ${data.user.name}.`);
+    } catch (error) {
+      setNotice(error.response?.data?.message || 'No se pudo crear la cuenta.');
     } finally {
       setIsSaving(false);
     }
@@ -149,7 +176,7 @@ export default function AdminDashboard() {
         <section className="admin-dashboard__users-card" id="users" aria-labelledby="users-title">
           <div className="admin-dashboard__users-heading">
             <div><span className="admin-dashboard__eyebrow">DIRECTORIO</span><h2 id="users-title">Cuentas de usuario <span>{stats.total}</span></h2></div>
-            <p>Selecciona una cuenta para cambiar sus datos o su rol.</p>
+            <div className="admin-dashboard__users-actions"><p>Selecciona una cuenta para cambiar sus datos o su rol.</p><button className="admin-dashboard__create" type="button" onClick={openCreateModal}>+ Crear usuario</button></div>
           </div>
           {notice && <p className="admin-dashboard__notice" role="status">{notice}</p>}
           <div className="admin-dashboard__table-wrap">
@@ -173,19 +200,30 @@ export default function AdminDashboard() {
         <footer className="admin-dashboard__footer">Orbital Ctrl <span>·</span> Administración de cuentas</footer>
       </section>
 
-      {editingUser && (
-        <div className="admin-dashboard__scrim" onMouseDown={(event) => { if (event.target === event.currentTarget) setEditingUser(null); }}>
+      {(editingUser || isCreateModalOpen) && (
+        <div className="admin-dashboard__scrim" onMouseDown={(event) => { if (event.target === event.currentTarget) { setEditingUser(null); setIsCreateModalOpen(false); } }}>
           <section className="admin-dashboard__editor" role="dialog" aria-modal="true" aria-labelledby="edit-user-title">
-            <button className="admin-dashboard__close" type="button" aria-label="Cerrar edición" onClick={() => setEditingUser(null)}>×</button>
-            <span className="admin-dashboard__eyebrow">PERFIL DE CUENTA</span>
-            <h2 id="edit-user-title">Editar usuario</h2>
-            <p>Actualiza la información y el nivel de acceso de esta cuenta.</p>
-            <form onSubmit={handleSave}>
-              <label>Nombre<input required value={form.name} onChange={(event) => setForm({ ...form, name: event.target.value })} /></label>
-              <label>Correo electrónico<input required type="email" value={form.email} onChange={(event) => setForm({ ...form, email: event.target.value })} /></label>
-              <label>Rol de plataforma<select value={form.platformRole} onChange={(event) => setForm({ ...form, platformRole: event.target.value })}><option value="USER">Usuario</option><option value="ADMIN">Administrador</option></select></label>
+            <button className="admin-dashboard__close" type="button" aria-label="Cerrar ventana" onClick={() => { setEditingUser(null); setIsCreateModalOpen(false); }}>×</button>
+            <span className="admin-dashboard__eyebrow">{isCreateModalOpen ? 'NUEVA CUENTA' : 'PERFIL DE CUENTA'}</span>
+            <h2 id="edit-user-title">{isCreateModalOpen ? 'Crear usuario' : 'Editar usuario'}</h2>
+            <p>{isCreateModalOpen ? 'Crea una cuenta y define su acceso al panel.' : 'Actualiza la información y el nivel de acceso de esta cuenta.'}</p>
+            <form onSubmit={isCreateModalOpen ? handleCreateUser : handleSave}>
+              {isCreateModalOpen ? (
+                <>
+                  <label>Nombre<input required autoComplete="name" value={createForm.name} onChange={(event) => setCreateForm({ ...createForm, name: event.target.value })} /></label>
+                  <label>Correo electrónico<input required type="email" autoComplete="email" value={createForm.email} onChange={(event) => setCreateForm({ ...createForm, email: event.target.value })} /></label>
+                  <label>Contraseña inicial<input required type="password" minLength={8} autoComplete="new-password" value={createForm.password} onChange={(event) => setCreateForm({ ...createForm, password: event.target.value })} /><small>Mínimo 8 caracteres.</small></label>
+                  <label>Rol de plataforma<select value={createForm.platformRole} onChange={(event) => setCreateForm({ ...createForm, platformRole: event.target.value })}><option value="USER">Usuario</option><option value="ADMIN">Administrador</option></select></label>
+                </>
+              ) : (
+                <>
+                  <label>Nombre<input required value={form.name} onChange={(event) => setForm({ ...form, name: event.target.value })} /></label>
+                  <label>Correo electrónico<input required type="email" value={form.email} onChange={(event) => setForm({ ...form, email: event.target.value })} /></label>
+                  <label>Rol de plataforma<select value={form.platformRole} onChange={(event) => setForm({ ...form, platformRole: event.target.value })}><option value="USER">Usuario</option><option value="ADMIN">Administrador</option></select></label>
+                </>
+              )}
               {notice && <p className="admin-dashboard__notice" role="status">{notice}</p>}
-              <div className="admin-dashboard__editor-actions"><button className="admin-dashboard__cancel" type="button" onClick={() => setEditingUser(null)}>Cancelar</button><button className="admin-dashboard__save" type="submit" disabled={isSaving}>{isSaving ? 'Guardando…' : 'Guardar cambios'}</button></div>
+              <div className="admin-dashboard__editor-actions"><button className="admin-dashboard__cancel" type="button" onClick={() => { setEditingUser(null); setIsCreateModalOpen(false); }}>Cancelar</button><button className="admin-dashboard__save" type="submit" disabled={isSaving}>{isSaving ? (isCreateModalOpen ? 'Creando…' : 'Guardando…') : (isCreateModalOpen ? 'Crear cuenta' : 'Guardar cambios')}</button></div>
             </form>
           </section>
         </div>
