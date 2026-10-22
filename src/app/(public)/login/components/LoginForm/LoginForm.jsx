@@ -34,7 +34,8 @@ function AccountForm({ mode, searchParams }) {
     setNotice('');
     setIsSubmitting(true);
 
-    const form = new FormData(event.currentTarget);
+    const formElement = event.currentTarget;
+    const form = new FormData(formElement);
     const email = String(form.get('email') || '').trim();
     const password = String(form.get('password') || '');
     const payload = isRegister
@@ -49,6 +50,11 @@ function AccountForm({ mode, searchParams }) {
     try {
       const service = new HttpService();
       const { data } = await service.postData(`/api/auth/${isRegister ? 'register' : 'login'}`, payload);
+      if (isRegister) {
+        formElement.reset();
+        setNotice(data.message || 'Revisa tu correo para verificar tu cuenta.');
+        return;
+      }
       sessionStorage.setItem('orbital_access_token', data.token);
       setSession(data.token, { ...data.user, workspace: data.workspace });
       router.replace(data.user.platformRole === 'ADMIN' ? '/dashboard/admin' : '/dashboard');
@@ -101,7 +107,7 @@ function AccountForm({ mode, searchParams }) {
         <div className="login-form__field">
           <div className="login-form__label-row">
             <label htmlFor="login-password">Contraseña</label>
-            {!isRegister && <button type="button" onClick={() => setNotice('La recuperación de contraseña estará disponible próximamente.')}>¿Olvidaste tu clave?</button>}
+            {!isRegister && <Link href="/forgot-password">¿Olvidaste tu clave?</Link>}
           </div>
           <div className="login-form__input">
             <LoginIcon name="key" />
