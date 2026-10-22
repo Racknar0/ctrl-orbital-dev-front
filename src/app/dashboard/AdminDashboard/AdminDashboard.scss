@@ -429,6 +429,7 @@
   }
 
   &__edit,
+  &__delete,
   &__cancel,
   &__save {
     padding: 0.55rem 0.85rem;
@@ -448,6 +449,23 @@
     padding-block: 2.5rem;
     color: var(--admin-muted);
     text-align: center;
+  }
+
+  &__row-actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 8px;
+  }
+
+  &__delete { color: #b5493e; border-color: #d88880; }
+  &__deletion-reason { width: 100%; max-width: 250px; color: var(--admin-muted); font-size: var(--text-caption); white-space: normal; }
+  &__row-actions button:disabled { opacity: .45; cursor: not-allowed; }
+
+  &__account-status {
+    font-size: var(--text-small);
+    &--active { color: #34805b; }
+    &--inactive { color: var(--admin-muted); }
   }
 
   &__footer {

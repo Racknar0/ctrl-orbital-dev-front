@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import HttpService from '@/services/HttpService';
 import PasswordInput from '@/components/PasswordInput/PasswordInput';
+import UserAccountAction from './components/UserAccountAction/UserAccountAction';
 import useStore, { getState } from '@/store/useStore';
 import './AdminDashboard.scss';
 
@@ -25,6 +26,8 @@ export default function AdminDashboard() {
   const [form, setForm] = useState({ name: '', email: '', platformRole: 'USER' });
   const [createForm, setCreateForm] = useState({ name: '', email: '', password: '', platformRole: 'USER' });
   const [notice, setNotice] = useState('');
+  const [accountAction, setAccountAction] = useState(null);
+  const [actionError, setActionError] = useState('');
 
   useEffect(() => {
     let active = true;
@@ -65,7 +68,7 @@ export default function AdminDashboard() {
 
   const stats = useMemo(() => ({
     total: users.length,
-    admins: users.filter((user) => user.platformRole === 'ADMIN').length,
+    admins: users.filter((user) => user.platformRole === 'ADMIN' && user.isActive).length,
     workspaces: users.reduce((total, user) => total + user.workspaceCount, 0),
   }), [users]);
 
@@ -80,6 +83,36 @@ export default function AdminDashboard() {
     setIsCreateModalOpen(false);
     setForm({ name: user.name, email: user.email, platformRole: user.platformRole });
     setNotice('');
+  }
+
+  function openAccountAction(user, type) {
+    setNotice('');
+    setActionError('');
+    setAccountAction({ user, type });
+  }
+
+  async function handleAccountAction(emailConfirmation) {
+    if (!accountAction || isSaving) return;
+    setIsSaving(true);
+    setActionError('');
+    try {
+      const { user, type } = accountAction;
+      const service = new HttpService();
+      if (type === 'delete') {
+        const { data } = await service.deleteDataWithBody(`/api/users/${user.id}`, { emailConfirmation });
+        setUsers((previous) => previous.filter((item) => item.id !== user.id));
+        setNotice(data.message);
+      } else {
+        const { data } = await service.patchData(`/api/users/${user.id}`, { isActive: type === 'activate' });
+        setUsers((previous) => previous.map((item) => item.id === user.id ? { ...item, ...data.user } : item));
+        setNotice(type === 'activate' ? `Se reactivó la cuenta de ${user.name}.` : `Se desactivó la cuenta de ${user.name}. Sus datos se conservaron.`);
+      }
+      setAccountAction(null);
+    } catch (error) {
+      setActionError(error.response?.data?.message || 'No se pudo completar la acción. Inténtalo de nuevo.');
+    } finally {
+      setIsSaving(false);
+    }
   }
 
   function openCreateModal() {
@@ -170,7 +203,7 @@ export default function AdminDashboard() {
 
         <div className="admin-dashboard__stats" aria-label="Resumen de usuarios">
           <article className="admin-dashboard__stat"><span>Cuentas registradas</span><strong>{stats.total}</strong><small>En toda la plataforma</small></article>
-          <article className="admin-dashboard__stat"><span>Administradores</span><strong>{stats.admins}</strong><small>Acceso al panel de control</small></article>
+          <article className="admin-dashboard__stat"><span>Administradores activos</span><strong>{stats.admins}</strong><small>Acceso al panel de control</small></article>
           <article className="admin-dashboard__stat"><span>Espacios creados</span><strong>{stats.workspaces}</strong><small>Vinculados a las cuentas</small></article>
         </div>
 
@@ -182,24 +215,32 @@ export default function AdminDashboard() {
           {notice && <p className="admin-dashboard__notice" role="status">{notice}</p>}
           <div className="admin-dashboard__table-wrap">
             <table className="admin-dashboard__table">
-              <thead><tr><th>Usuario</th><th>Rol de plataforma</th><th>Espacios</th><th>Fecha de registro</th><th><span className="admin-dashboard__visually-hidden">Acciones</span></th></tr></thead>
+              <thead><tr><th>Usuario</th><th>Rol de plataforma</th><th>Estado</th><th>Espacios</th><th>Fecha de registro</th><th><span className="admin-dashboard__visually-hidden">Acciones</span></th></tr></thead>
               <tbody>
                 {users.map((user) => (
                   <tr key={user.id}>
                     <td><div className="admin-dashboard__user-cell"><span className="admin-dashboard__avatar admin-dashboard__avatar--table">{initials(user.name)}</span><span><strong>{user.name}</strong><small>{user.email}</small></span></div></td>
                     <td><span className={`admin-dashboard__role admin-dashboard__role--${user.platformRole.toLowerCase()}`}>{user.platformRole === 'ADMIN' ? 'Administrador' : 'Usuario'}</span></td>
+                    <td><span className={`admin-dashboard__account-status admin-dashboard__account-status--${user.isActive ? 'active' : 'inactive'}`}>{user.isActive ? 'Activo' : 'Desactivado'}</span></td>
                     <td>{user.workspaceCount}</td>
                     <td>{dateFormatter.format(new Date(user.createdAt))}</td>
-                    <td><button className="admin-dashboard__edit" type="button" onClick={() => openEditor(user)}>Editar</button></td>
+                    <td><div className="admin-dashboard__row-actions">
+                      <button className="admin-dashboard__edit" type="button" onClick={() => openEditor(user)}>Editar</button>
+                      <button className="admin-dashboard__edit" type="button" disabled={user.id === currentUser?.id || (user.isActive && user.platformRole === 'ADMIN' && stats.admins <= 1)} onClick={() => openAccountAction(user, user.isActive ? 'deactivate' : 'activate')}>{user.isActive ? 'Desactivar' : 'Reactivar'}</button>
+                      {!user.isActive && <button className="admin-dashboard__delete" type="button" disabled={user.id === currentUser?.id || !!user.deletionBlockedReason} title={user.deletionBlockedReason || undefined} onClick={() => openAccountAction(user, 'delete')}>Eliminar</button>}
+                      {!user.isActive && user.deletionBlockedReason && <small className="admin-dashboard__deletion-reason">{user.deletionBlockedReason}</small>}
+                    </div></td>
                   </tr>
                 ))}
-                {!users.length && <tr><td className="admin-dashboard__empty" colSpan="5">Aún no hay cuentas para mostrar.</td></tr>}
+                {!users.length && <tr><td className="admin-dashboard__empty" colSpan="6">Aún no hay cuentas para mostrar.</td></tr>}
               </tbody>
             </table>
           </div>
         </section>
         <footer className="admin-dashboard__footer">Orbital Ctrl <span>·</span> Administración de cuentas</footer>
       </section>
+
+      {accountAction && <UserAccountAction key={`${accountAction.user.id}-${accountAction.type}`} action={accountAction} isSaving={isSaving} error={actionError} onCancel={() => { if (!isSaving) setAccountAction(null); }} onConfirm={handleAccountAction} />}
 
       {(editingUser || isCreateModalOpen) && (
         <div className="admin-dashboard__scrim" onMouseDown={(event) => { if (event.target === event.currentTarget) { setEditingUser(null); setIsCreateModalOpen(false); } }}>
