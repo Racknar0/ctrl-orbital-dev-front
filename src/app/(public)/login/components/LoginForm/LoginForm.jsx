@@ -126,8 +126,8 @@ function AccountForm({ mode, searchParams }) {
         </button>
         <p className="login-form__terms">
           Al continuar, aceptas nuestros{' '}
-          <button type="button" onClick={() => setNotice('Los términos y la política de privacidad estarán disponibles próximamente.')}>Términos y Condiciones</button>{' '}
-          y Política de Privacidad de Orbital Dev.
+          <Link href="/terminos">Términos y condiciones</Link>{' '}
+          y puedes consultar nuestra <Link href="/privacidad">Política de privacidad</Link>.
         </p>
       </form>
 

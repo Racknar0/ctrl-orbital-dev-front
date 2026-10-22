@@ -22,7 +22,7 @@ axiosInstance.interceptors.request.use(
     }
 
     const token = getState().token;
-    if (token && !config.headers.has('Authorization')) {
+    if (token && !config.url?.startsWith('/api/quick-rooms') && !config.headers.has('Authorization')) {
       config.headers.set('Authorization', `Bearer ${token}`);
     }
 

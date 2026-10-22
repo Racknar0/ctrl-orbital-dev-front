@@ -60,6 +60,11 @@
       text-decoration: underline;
     }
   }
+  &__legal {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px 24px;
+  }
   @media (max-width: 900px)  {
     &__grid  {
       grid-template-columns: repeat(2,1fr);

@@ -47,6 +47,22 @@ Se conserva la licencia oficial en `src/assets/fonts/satoshi/LICENSE.txt`. [Fuen
 
 El formulario de registro e inicio de sesión consume el backend Express en `NEXT_PUBLIC_BACK_HOST` (por defecto `http://localhost:4000`). El backend necesita PostgreSQL; configura sus variables en `back/.env`, aplica la migración con `npm run db:migrate` y arráncalo con `npm run dev`.
 
-El registro crea la cuenta y un primer espacio de trabajo. Después de iniciar sesión, `/dashboard` muestra un mensaje inicial. La verificación de correo, recuperación de contraseña y acceso social aún no están implementados.
+El registro crea la cuenta y un primer espacio de trabajo. Las cuentas nuevas verifican su correo antes de iniciar sesión. La recuperación de contraseña funciona mediante correo. El acceso social está pendiente.
 
 No se versionan dependencias, compilaciones, archivos locales de entorno ni claves privadas.
+
+## Probar salas rápidas
+
+Abre `http://localhost:3001/salas-rapidas` con el frontend en el puerto 3001 y el backend local en el 4000. Crea una sala y abre su invitación en una ventana incógnita para entrar como otra persona. Registra gastos después de que entren quienes participarán en el reparto. Los datos y saldos se actualizan cada cinco segundos.
+
+La sesión de invitado de cada sala se conserva en este navegador mediante `localStorage`. Borrar los datos del navegador elimina ese acceso. Las salas no se vinculan todavía con cuentas registradas.
+
+### Pruebas automatizadas del navegador
+
+Con backend y frontend locales encendidos, PostgreSQL local migrado y Google Chrome instalado:
+
+```sh
+npm run test:salas-rapidas
+```
+
+Playwright ejecuta seis escenarios: recorrido con dos invitados y pago confirmado, varias salas y recarga, edición/eliminación de gastos, perfil de pago y errores de validación, móvil/vencimiento y código inexistente. Los repositorios `back/` y `front/` deben ser carpetas hermanas, como en este proyecto; la suite usa el Prisma del backend para eliminar únicamente sus salas de prueba. Solo admite la base local `app_gastos` y no resetea tablas ni usuarios. El reporte HTML queda en `playwright-report/index.html` y los fallos incluyen captura y traza.

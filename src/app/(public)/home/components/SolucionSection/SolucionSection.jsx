@@ -4,7 +4,7 @@ import './SolucionSection.scss';
 const steps = [
   { image: 'solucion-aportes', alt: 'Ilustración de control individual de gastos', title: '1. Tu espacio privado', description: 'Registra tus compras, guarda fotos de tus recibos y lleva tu presupuesto personal al día sin que nadie más tenga acceso.', note: '100% privado e independiente' },
   { image: 'solucion-comprobantes', alt: 'Ilustración de conexión colaborativa', title: '2. Espacios compartidos', description: 'Conéctate con tu pareja, compañeros o equipo de trabajo. Los gastos comunes se sincronizan al instante para todos.', note: 'Sincronización en vivo' },
-  { image: 'solucion-saldos', alt: 'Ilustración de salas rápidas con código', title: '3. Salas rápidas con código', description: 'Para un viaje, salida o asado puntual: abre una sala rápida y tus amigos se suman con un código de 4 dígitos sin registrarse.', note: 'Sin registro ni descargas' },
+  { image: 'solucion-saldos', alt: 'Ilustración de salas rápidas con código', title: '3. Salas rápidas con código', description: 'Para un viaje, salida o asado puntual: abre una sala rápida y tus amigos se suman con el enlace o código de invitación sin registrarse.', note: 'Sin registro ni descargas' },
 ];
 export default function SolucionSection() {
   return <section id="solucion" className="solution">

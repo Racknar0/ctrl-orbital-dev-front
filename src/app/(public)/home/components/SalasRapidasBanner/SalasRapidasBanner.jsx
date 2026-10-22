@@ -63,9 +63,9 @@ export default function SalasRapidasBanner({ initialOpen = false, onClose }) {
           <span className="quick-rooms__badge"><Zap size={14} />Salas Rápidas · Cero Registro</span>
           <h2 id="quick-rooms-title">¿Un viaje, salida o actividad grupal?<br /><span>Dividan los gastos con un código.</span></h2>
           <p>Lleva tus finanzas diarias en tu propia app. Y cuando hagas una salida, viaje o asado con amigos o compañeros, abres una sala temporal: cada uno anota lo que pagó y se reparte la cuenta sin que nadie tenga que registrarse.</p>
-          <div className="quick-rooms__benefits">{[['🎯','Acceso con código','Sin descargar apps ni crear cuentas.'],['⚖️','Reparto exacto','Cero enredos: cada uno paga lo justo.'],['📲','Alias & CBU en 1 toque','Paga directo a las apps de banco.']].map(([icon,title,text])=><div key={title}><span aria-hidden="true">{icon}</span><div><strong>{title}</strong><small>{text}</small></div></div>)}</div>
+          <div className="quick-rooms__benefits">{[['🎯','Acceso con código','Sin descargar apps ni crear cuentas.'],['⚖️','Reparto exacto','Cero enredos: cada uno paga lo justo.'],['📲','Datos de pago a un toque','Copia los datos para transferir.']].map(([icon,title,text])=><div key={title}><span aria-hidden="true">{icon}</span><div><strong>{title}</strong><small>{text}</small></div></div>)}</div>
         </div>
-        <div className="quick-rooms__action"><Link href="/salas-rapidas">Abrir Salas Rápidas<ArrowRight size={16} /></Link><small>✧ Prueba Asados, Bares y Pizzas</small></div>
+        <div className="quick-rooms__action"><Link href="/salas-rapidas">Abrir Salas Rápidas<ArrowRight size={16} /></Link><small>30 días de actividad · Sin registro</small></div>
       </div> : <div className="quick-rooms__app">
         <header className="quick-rooms__app-header">
           <div><span className="quick-rooms__badge"><Zap size={14} />Sala de prueba · Sin registro</span><h2 id="quick-rooms-title">Tu grupo, <span>cuenta clara.</span></h2></div>

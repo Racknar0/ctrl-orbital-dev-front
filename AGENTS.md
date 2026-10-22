@@ -64,3 +64,12 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 ## Validación
 - Comprobar que el código compile ejecutando `npm run lint` y `npm run build` antes de dar por cerrada la tarea.
 - Al terminar, listar los archivos modificados y los puntos pendientes.
+
+## Despliegue de producción
+- El VPS de Orbital Ctrl publica desde `master` con los comandos `u_back_ctrl` y `u_front_ctrl`, ejecutados con privilegios de administrador del VPS.
+- Para cambios del frontend, usa `u_front_ctrl`; para cambios del backend, usa `u_back_ctrl`. Cada comando despliega únicamente su servicio y reinicia únicamente su proceso PM2 correspondiente.
+- Los comandos toman el último commit de GitHub en `master`. Los cambios deben estar commiteados y subidos antes de desplegar; no despliegues trabajo local sin publicar.
+- El despliegue conserva releases anteriores y revierte el enlace estable si falla el chequeo de salud. Instala dependencias solo cuando cambia `package-lock.json`.
+- No hagas `git pull`, compilaciones ni cambios de symlink directamente dentro de `/opt/orbital-ctrl/front` o `/opt/orbital-ctrl/back`; son rutas estables administradas por el despliegue.
+- No muestres, sobrescribas ni subas los `.env` de producción. Si el acceso SSH o los comandos no están disponibles, informa el bloqueo y no simules un despliegue.
+- Si una tarea requiere cambiar modelos o el esquema de datos, trata el cambio como trabajo del backend: incluye una migración Prisma nueva en el mismo cambio y sigue el flujo obligatorio de migraciones del `AGENTS.md` del backend. No resuelvas cambios de esquema con ajustes solo en el front.
