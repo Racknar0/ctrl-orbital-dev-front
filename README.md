@@ -43,10 +43,10 @@ node scripts/setup-fonts.mjs
 
 Se conserva la licencia oficial en `src/assets/fonts/satoshi/LICENSE.txt`. [Fuente y condiciones de uso de Satoshi](https://www.fontshare.com/fonts/satoshi).
 
-## Backend
+## Backend y acceso
 
-Copiar `.env.example` a `.env.local` y completar `NEXT_PUBLIC_BACK_HOST` cuando se defina el backend. No guardar secretos en variables `NEXT_PUBLIC_*`.
+El formulario de registro e inicio de sesión consume el backend Express en `NEXT_PUBLIC_BACK_HOST` (por defecto `http://localhost:4000`). El backend necesita PostgreSQL; configura sus variables en `back/.env`, aplica la migración con `npm run db:migrate` y arráncalo con `npm run dev`.
 
-El home está implementado. Los enlaces a login, dashboard, salas, sugerencias y términos conservan sus destinos, cuyas pantallas aún están pendientes de implementar.
+El registro crea la cuenta y un primer espacio de trabajo. Después de iniciar sesión, `/dashboard` muestra un mensaje inicial. La verificación de correo, recuperación de contraseña y acceso social aún no están implementados.
 
 No se versionan dependencias, compilaciones, archivos locales de entorno ni claves privadas.

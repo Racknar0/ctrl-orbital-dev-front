@@ -40,6 +40,9 @@ axiosInstance.interceptors.response.use(
     // No cerrar una sesión nueva por una respuesta pendiente del token anterior.
     if (error.response?.status === 401 && token && authorization === `Bearer ${token}`) {
       getState().logout();
+      if (typeof window !== 'undefined') {
+        window.sessionStorage.removeItem('orbital_access_token');
+      }
     }
 
     // Las rutas de acceso y la presentación de errores se definirán con su UI.

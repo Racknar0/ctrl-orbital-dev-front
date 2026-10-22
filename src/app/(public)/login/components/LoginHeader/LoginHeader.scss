@@ -1,0 +1,36 @@
+.login-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 24px;
+  padding-inline: 8px;
+
+  &__back {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--login-muted);
+    font-size: var(--text-small);
+    font-weight: var(--weight-bold);
+
+    &:hover {
+      color: var(--login-ink);
+    }
+  }
+
+  &__theme {
+    display: grid;
+    place-items: center;
+    width: 36px;
+    height: 36px;
+    border: 1px solid var(--login-line);
+    border-radius: 50%;
+    background: var(--login-surface);
+    color: var(--login-accent);
+
+    &:hover {
+      border-color: var(--login-accent);
+    }
+  }
+}
